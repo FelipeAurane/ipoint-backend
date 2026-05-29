@@ -28,8 +28,8 @@ export default function OrderSuccessScreen() {
     Animated.sequence([
       Animated.delay(200),
       Animated.parallel([
-        Animated.spring(scale, { toValue: 1, friction: 4, tension: 60, useNativeDriver: true }),
-        Animated.timing(opacity, { toValue: 1, duration: 400, useNativeDriver: true }),
+        Animated.spring(scale, { toValue: 1, friction: 4, tension: 60, useNativeDriver: false }),
+        Animated.timing(opacity, { toValue: 1, duration: 400, useNativeDriver: false }),
       ]),
     ]).start();
   }, []);
