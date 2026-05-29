@@ -1,0 +1,8 @@
+{
+  "outputDirectory": "dist",
+  "buildCommand": "npx expo export --platform web",
+  "installCommand": "npm install && npx expo install react-native-web react-dom @expo/metro-runtime",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ]
+}
