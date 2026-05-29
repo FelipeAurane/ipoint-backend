@@ -1,0 +1,5 @@
+{
+  "buildCommand": "cd oxe-app && npm install --legacy-peer-deps && npx expo install react-native-web react-dom @expo/metro-runtime && npx expo export --platform web",
+  "outputDirectory": "oxe-app/dist",
+  "rewrites": [{ "source": "/(.*)", "destination": "/" }]
+}
