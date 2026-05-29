@@ -18,6 +18,8 @@ import CheckoutScreen from '../screens/main/CheckoutScreen';
 import OrdersScreen from '../screens/main/OrdersScreen';
 import ProfileScreen from '../screens/main/ProfileScreen';
 import OrderSuccessScreen from '../screens/main/OrderSuccessScreen';
+import WishlistScreen from '../screens/main/WishlistScreen';
+import { useWishlist } from '../context/WishlistContext';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -26,6 +28,8 @@ export type RootStackParamList = {
   ProductDetail: { productId: string };
   Checkout: undefined;
   OrderSuccess: { orderId: string };
+  Wishlist: undefined;
+  Orders: undefined;
 };
 
 export type AuthStackParamList = {
@@ -37,7 +41,7 @@ export type MainTabParamList = {
   Home: undefined;
   Explore: { categoryId?: string; searchQuery?: string } | undefined;
   Cart: undefined;
-  Orders: undefined;
+  Wishlist: undefined;
   Profile: undefined;
 };
 
@@ -53,6 +57,20 @@ function CartTabIcon({ color, size }: { color: string; size: number }) {
       {itemCount > 0 && (
         <View style={styles.badge}>
           <Text style={styles.badgeText}>{itemCount > 99 ? '99+' : itemCount}</Text>
+        </View>
+      )}
+    </View>
+  );
+}
+
+function WishlistTabIcon({ color, size }: { color: string; size: number }) {
+  const { count } = useWishlist();
+  return (
+    <View>
+      <Ionicons name={count > 0 ? 'heart' : 'heart-outline'} size={size} color={color} />
+      {count > 0 && (
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>{count > 99 ? '99+' : count}</Text>
         </View>
       )}
     </View>
@@ -118,13 +136,11 @@ function MainNavigator() {
         }}
       />
       <Tab.Screen
-        name="Orders"
-        component={OrdersScreen}
+        name="Wishlist"
+        component={WishlistScreen}
         options={{
-          tabBarLabel: 'Pedidos',
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? 'receipt' : 'receipt-outline'} size={size} color={color} />
-          ),
+          tabBarLabel: 'Desejos',
+          tabBarIcon: ({ color, size }) => <WishlistTabIcon color={color} size={size} />,
         }}
       />
       <Tab.Screen
@@ -161,6 +177,16 @@ export default function AppNavigator() {
         name="OrderSuccess"
         component={OrderSuccessScreen}
         options={{ headerShown: false, animation: 'fade' }}
+      />
+      <RootStack.Screen
+        name="Wishlist"
+        component={WishlistScreen}
+        options={{ headerShown: false, animation: 'slide_from_right' }}
+      />
+      <RootStack.Screen
+        name="Orders"
+        component={OrdersScreen}
+        options={{ headerShown: false, animation: 'slide_from_right' }}
       />
     </RootStack.Navigator>
   );

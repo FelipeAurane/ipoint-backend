@@ -7,6 +7,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useAuth } from '../../context/AuthContext';
@@ -62,12 +63,21 @@ function OrderCard({ order }: { order: Order }) {
 
 export default function OrdersScreen() {
   const { orders } = useAuth();
+  const navigation = useNavigation();
+  const canGoBack = navigation.canGoBack();
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.title}>Meus Pedidos</Text>
-        <Text style={styles.subtitle}>{orders.length} pedido{orders.length !== 1 ? 's' : ''}</Text>
+        {canGoBack && (
+          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()} hitSlop={8}>
+            <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
+          </TouchableOpacity>
+        )}
+        <View>
+          <Text style={styles.title}>Meus Pedidos</Text>
+          <Text style={styles.subtitle}>{orders.length} pedido{orders.length !== 1 ? 's' : ''}</Text>
+        </View>
       </View>
 
       <FlatList
@@ -92,8 +102,17 @@ export default function OrdersScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
+  },
+  backBtn: {
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   title: { fontSize: 22, fontWeight: '800', color: colors.textPrimary },
   subtitle: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
