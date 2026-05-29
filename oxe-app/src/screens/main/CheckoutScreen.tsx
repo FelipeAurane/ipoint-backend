@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useReducer, useState } from 'react';
 import {
   View,
   Text,
@@ -27,6 +27,38 @@ type NavProp = NativeStackNavigationProp<RootStackParamList>;
 
 type PaymentMethod = 'pix' | 'credit' | 'boleto';
 
+interface AddressState {
+  street: string;
+  number: string;
+  complement: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  zipCode: string;
+}
+
+type AddressAction = { field: keyof AddressState; value: string };
+
+const initialAddress: AddressState = {
+  street: '',
+  number: '',
+  complement: '',
+  neighborhood: '',
+  city: '',
+  state: '',
+  zipCode: '',
+};
+
+function addressReducer(state: AddressState, action: AddressAction): AddressState {
+  return { ...state, [action.field]: action.value };
+}
+
+function maskCEP(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 8);
+  if (digits.length <= 5) return digits;
+  return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+}
+
 const PAYMENT_OPTIONS: { key: PaymentMethod; label: string; icon: string; desc: string }[] = [
   { key: 'pix', label: 'PIX', icon: 'flash-outline', desc: 'Aprovação imediata • 5% de desconto' },
   { key: 'credit', label: 'Cartão de Crédito', icon: 'card-outline', desc: 'Até 12x sem juros' },
@@ -38,16 +70,15 @@ export default function CheckoutScreen() {
   const { items, total, clearCart } = useCart();
   const { addOrder } = useAuth();
 
-  const [street, setStreet] = useState('');
-  const [number, setNumber] = useState('');
-  const [complement, setComplement] = useState('');
-  const [neighborhood, setNeighborhood] = useState('');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
-  const [zipCode, setZipCode] = useState('');
+  const [address, dispatchAddress] = useReducer(addressReducer, initialAddress);
   const [payment, setPayment] = useState<PaymentMethod>('pix');
   const [loading, setLoading] = useState(false);
 
+  function setField(field: keyof AddressState) {
+    return (value: string) => dispatchAddress({ field, value });
+  }
+
+  const { street, number, complement, neighborhood, city, state, zipCode } = address;
   const shippingCost = total >= 99 ? 0 : 12.9;
   const pixDiscount = payment === 'pix' ? total * 0.05 : 0;
   const orderTotal = total + shippingCost - pixDiscount;
@@ -106,38 +137,46 @@ export default function CheckoutScreen() {
             <View style={styles.fieldRow}>
               <View style={[styles.fieldGroup, { flex: 2 }]}>
                 <Text style={styles.label}>Rua / Avenida</Text>
-                <TextInput style={styles.input} value={street} onChangeText={setStreet} placeholder="Ex: Rua das Flores" placeholderTextColor={colors.textSecondary} />
+                <TextInput style={styles.input} value={street} onChangeText={setField('street')} placeholder="Ex: Rua das Flores" placeholderTextColor={colors.textSecondary} />
               </View>
               <View style={[styles.fieldGroup, { flex: 1 }]}>
                 <Text style={styles.label}>Número</Text>
-                <TextInput style={styles.input} value={number} onChangeText={setNumber} placeholder="42" placeholderTextColor={colors.textSecondary} keyboardType="numeric" />
+                <TextInput style={styles.input} value={number} onChangeText={setField('number')} placeholder="42" placeholderTextColor={colors.textSecondary} keyboardType="numeric" />
               </View>
             </View>
 
             <View style={styles.fieldGroup}>
               <Text style={styles.label}>Complemento (opcional)</Text>
-              <TextInput style={styles.input} value={complement} onChangeText={setComplement} placeholder="Apto, bloco..." placeholderTextColor={colors.textSecondary} />
+              <TextInput style={styles.input} value={complement} onChangeText={setField('complement')} placeholder="Apto, bloco..." placeholderTextColor={colors.textSecondary} />
             </View>
 
             <View style={styles.fieldGroup}>
               <Text style={styles.label}>Bairro</Text>
-              <TextInput style={styles.input} value={neighborhood} onChangeText={setNeighborhood} placeholder="Ex: Centro" placeholderTextColor={colors.textSecondary} />
+              <TextInput style={styles.input} value={neighborhood} onChangeText={setField('neighborhood')} placeholder="Ex: Centro" placeholderTextColor={colors.textSecondary} />
             </View>
 
             <View style={styles.fieldRow}>
               <View style={[styles.fieldGroup, { flex: 2 }]}>
                 <Text style={styles.label}>Cidade</Text>
-                <TextInput style={styles.input} value={city} onChangeText={setCity} placeholder="Ex: Recife" placeholderTextColor={colors.textSecondary} />
+                <TextInput style={styles.input} value={city} onChangeText={setField('city')} placeholder="Ex: Recife" placeholderTextColor={colors.textSecondary} />
               </View>
               <View style={[styles.fieldGroup, { flex: 1 }]}>
                 <Text style={styles.label}>Estado</Text>
-                <TextInput style={styles.input} value={state} onChangeText={setState} placeholder="PE" placeholderTextColor={colors.textSecondary} maxLength={2} autoCapitalize="characters" />
+                <TextInput style={styles.input} value={state} onChangeText={(v) => setField('state')(v.toUpperCase())} placeholder="PE" placeholderTextColor={colors.textSecondary} maxLength={2} autoCapitalize="characters" />
               </View>
             </View>
 
             <View style={styles.fieldGroup}>
               <Text style={styles.label}>CEP</Text>
-              <TextInput style={styles.input} value={zipCode} onChangeText={setZipCode} placeholder="00000-000" placeholderTextColor={colors.textSecondary} keyboardType="numeric" maxLength={9} />
+              <TextInput
+                style={styles.input}
+                value={zipCode}
+                onChangeText={(v) => setField('zipCode')(maskCEP(v))}
+                placeholder="00000-000"
+                placeholderTextColor={colors.textSecondary}
+                keyboardType="numeric"
+                maxLength={9}
+              />
             </View>
           </View>
 

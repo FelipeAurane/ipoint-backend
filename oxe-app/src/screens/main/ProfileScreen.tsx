@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { useAuth } from '../../context/AuthContext';
+import { useWishlist } from '../../context/WishlistContext';
 import { colors, spacing, borderRadius, shadows } from '../../theme';
 
 type NavProp = NativeStackNavigationProp<RootStackParamList>;
@@ -53,6 +54,7 @@ function MenuItem({ icon, label, onPress, destructive = false, badge }: MenuItem
 export default function ProfileScreen() {
   const navigation = useNavigation<NavProp>();
   const { user, logout, orders } = useAuth();
+  const { count: wishlistCount } = useWishlist();
 
   const deliveredCount = orders.filter((o) => o.status === 'delivered').length;
   const activeCount = orders.filter((o) => ['confirmed', 'shipped', 'pending'].includes(o.status)).length;
@@ -131,14 +133,15 @@ export default function ProfileScreen() {
             <MenuItem
               icon="receipt-outline"
               label="Meus pedidos"
-              onPress={() => navigation.navigate('Orders' as never)}
+              onPress={() => navigation.navigate('Orders')}
               badge={activeCount > 0 ? String(activeCount) : undefined}
             />
             <View style={styles.separator} />
             <MenuItem
               icon="heart-outline"
               label="Lista de desejos"
-              onPress={() => Alert.alert('Em breve', 'Funcionalidade em desenvolvimento')}
+              onPress={() => navigation.navigate('Wishlist')}
+              badge={wishlistCount > 0 ? String(wishlistCount) : undefined}
             />
             <View style={styles.separator} />
             <MenuItem

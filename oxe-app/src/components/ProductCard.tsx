@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Product } from '../types';
 import { colors, borderRadius, shadows } from '../theme';
 import { formatPrice, discountPercent } from '../utils/currency';
+import { useWishlist } from '../context/WishlistContext';
 
 const CARD_WIDTH = (Dimensions.get('window').width - 48) / 2;
 
@@ -22,6 +23,8 @@ interface Props {
 
 export default function ProductCard({ product, onPress, onAddToCart }: Props) {
   const [imgError, setImgError] = useState(false);
+  const { isWishlisted, toggle } = useWishlist();
+  const wishlisted = isWishlisted(product.id);
   const hasDiscount = !!product.originalPrice && product.originalPrice > product.price;
 
   return (
@@ -45,6 +48,17 @@ export default function ProductCard({ product, onPress, onAddToCart }: Props) {
             </Text>
           </View>
         )}
+        <TouchableOpacity
+          style={styles.heartBtn}
+          onPress={() => toggle(product)}
+          hitSlop={8}
+        >
+          <Ionicons
+            name={wishlisted ? 'heart' : 'heart-outline'}
+            size={18}
+            color={wishlisted ? colors.accent : colors.textSecondary}
+          />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.info}>
@@ -111,6 +125,17 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.full,
     paddingHorizontal: 8,
     paddingVertical: 3,
+  },
+  heartBtn: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 30,
+    height: 30,
+    borderRadius: borderRadius.full,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   badgeText: {
     color: colors.textLight,

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { borderRadius, spacing } from '../theme';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const BANNER_WIDTH = SCREEN_WIDTH - spacing.md * 2;
 const BANNER_HEIGHT = 160;
+const AUTO_SCROLL_INTERVAL = 3500;
 
 interface Props {
   banners: Banner[];
@@ -21,15 +22,44 @@ interface Props {
 
 export default function BannerCarousel({ banners }: Props) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const scrollRef = useRef<ScrollView>(null);
+  const currentIndex = useRef(0);
+  const isUserScrolling = useRef(false);
+
+  const scrollToIndex = useCallback(
+    (index: number) => {
+      scrollRef.current?.scrollTo({
+        x: index * (BANNER_WIDTH + spacing.sm),
+        animated: true,
+      });
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (banners.length <= 1) return;
+    const timer = setInterval(() => {
+      if (isUserScrolling.current) return;
+      const next = (currentIndex.current + 1) % banners.length;
+      scrollToIndex(next);
+      currentIndex.current = next;
+      setActiveIndex(next);
+    }, AUTO_SCROLL_INTERVAL);
+    return () => clearInterval(timer);
+  }, [banners.length, scrollToIndex]);
 
   function handleScroll(e: NativeSyntheticEvent<NativeScrollEvent>) {
-    const index = Math.round(e.nativeEvent.contentOffset.x / BANNER_WIDTH);
-    setActiveIndex(index);
+    const index = Math.round(e.nativeEvent.contentOffset.x / (BANNER_WIDTH + spacing.sm));
+    if (index !== currentIndex.current) {
+      currentIndex.current = index;
+      setActiveIndex(index);
+    }
   }
 
   return (
     <View>
       <ScrollView
+        ref={scrollRef}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
@@ -37,6 +67,8 @@ export default function BannerCarousel({ banners }: Props) {
         decelerationRate="fast"
         onScroll={handleScroll}
         scrollEventThrottle={16}
+        onScrollBeginDrag={() => { isUserScrolling.current = true; }}
+        onScrollEndDrag={() => { isUserScrolling.current = false; }}
         contentContainerStyle={{ paddingRight: spacing.sm }}
       >
         {banners.map((banner) => (
