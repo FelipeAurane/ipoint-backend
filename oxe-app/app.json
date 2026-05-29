@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "Oxe",
+    "slug": "oxe-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#FF6B00"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.oxe.marketplace"
+    },
+    "android": {
+      "package": "com.oxe.marketplace",
+      "adaptiveIcon": {
+        "backgroundColor": "#FF6B00"
+      }
+    },
+    "plugins": [
+      "expo-splash-screen"
+    ]
+  }
+}
