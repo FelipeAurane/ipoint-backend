@@ -16,8 +16,8 @@ export default function SplashScreen() {
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(opacity, { toValue: 1, duration: 600, useNativeDriver: true }),
-      Animated.spring(scale, { toValue: 1, friction: 5, tension: 80, useNativeDriver: true }),
+      Animated.timing(opacity, { toValue: 1, duration: 600, useNativeDriver: false }),
+      Animated.spring(scale, { toValue: 1, friction: 5, tension: 80, useNativeDriver: false }),
     ]).start();
   }, []);
 
